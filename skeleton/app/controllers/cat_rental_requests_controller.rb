@@ -1,4 +1,21 @@
 class CatRentalRequestsController < ApplicationController
+  before_action :require_login, only: [:new, :create]
+  before_action :require_ownership, only: [:approve, :deny]
+
+  def require_ownership
+    unless current_cat && current_cat.owner == current_user
+      flash[:errors] = ['You do not own this cat']
+      redirect_to root_url
+    end
+  end
+
+  def require_login
+    unless logged_in?
+      flash[:errors] = ['You must be logged in to request a cat']
+      redirect_to root_url
+    end
+  end
+
   def approve
     current_cat_rental_request.approve!
     redirect_to cat_url(current_cat)
@@ -6,6 +23,7 @@ class CatRentalRequestsController < ApplicationController
 
   def create
     @rental_request = CatRentalRequest.new(cat_rental_request_params)
+    @rental_request.requester = current_user
     if @rental_request.save
       redirect_to cat_url(@rental_request.cat)
     else

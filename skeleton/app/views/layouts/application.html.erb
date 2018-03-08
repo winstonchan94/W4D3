@@ -9,6 +9,35 @@
   </head>
 
   <body>
+    <header>
+      <% if logged_in? %>
+        <p>Hello,  <%= current_user.user_name %></p>
+        <form action='<%= session_url %>' method='POST'>
+          <%= hidden_field_tag :_method, 'DELETE' %>
+          <%= hidden_field_tag :authenticity_token, form_authenticity_token %>
+          <button>Log Out</button>
+        </form>
+      <% elsif !@hide_header_login %>
+        <!-- <form action='<%= session_url %>' method='GET'>
+          <%= hidden_field_tag :authenticity_token, form_authenticity_token %>
+          <button>Log In</button>
+        </form> -->
+        <%= render 'sessions/form', user_name: nil %>
+        <%= link_to 'Sign Up', new_user_url %>
+      <% end %>
+    </header>
+    <% if flash.key?(:errors) %>
+      <ul>
+      <% flash[:errors].each do |error|  %>
+        <li><%= error %></li>
+      <% end %>
+      <ul>
+    <% end %>
+
+    <% if flash.key?(:success) %>
+      <p><%= flash[:success] %></p>
+    <% end %>
+
     <%= yield %>
   </body>
 </html>
